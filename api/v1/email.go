@@ -12,9 +12,15 @@ var Vcode = utils.RandomNumber(6)
 
 // SendCode 发送验证码
 func SendCode(c *gin.Context) {
-	toemail := c.PostForm("email")
+	//toemail := c.PostForm("email")
 
-	err := model.Email(toemail, Vcode)
+	var e model.ToEmail
+	c.ShouldBind(&e)
+
+	//fmt.Printf("fromemail:%s\n", e.FromEmail)
+	fmt.Printf("toemail:%s\n", e.ToEmail)
+
+	err := model.Email(&e, Vcode)
 	if err != nil {
 		fmt.Println("err:", err)
 		c.JSON(http.StatusOK, gin.H{
@@ -31,7 +37,7 @@ func SendCode(c *gin.Context) {
 }
 
 // ResetPassword 重置密码
-func ResetPassword(c *gin.Context) {
+/*func ResetPassword(c *gin.Context) {
 	token := c.GetHeader("token")
 	toemail := c.PostForm("toemail")
 	inputCode := c.PostForm("inputcode")
@@ -69,4 +75,4 @@ func ResetPassword(c *gin.Context) {
 			"password": newPsw2,
 		})
 	}
-}
+}*/

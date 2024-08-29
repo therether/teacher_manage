@@ -22,12 +22,12 @@ type User struct {
 }
 
 type Admin struct {
-	ID            int    `gorm:"int;not null;unique" json:"id"`
-	Name          string `gorm:"type:varchar(50);not null" json:"name" validate:"required,min=2,max=4" label:"姓名"`
-	Number        string `gorm:"type:varchar(50);not null;unique;primary_key" json:"number" validate:"required,len=6" label:"工号"`
-	Password      string `gorm:"type:varchar(50);not null" json:"password" label:"密码"`
-	Role          int    `gorm:"int;not null" json:"role" validate:"required,eq=2" label:"权限"`
-	Sex           string `gorm:"type:varchar(50);not null" json:"sex"  label:"性别"`
+	ID       int    `gorm:"int;not null;unique" json:"id"`
+	Name     string `gorm:"type:varchar(50);not null" json:"name" validate:"required,min=2,max=4" label:"姓名"`
+	Number   string `gorm:"type:varchar(50);not null;unique;primary_key" json:"number" validate:"required,len=6" label:"工号"`
+	Password string `gorm:"type:varchar(50);not null" json:"password" label:"密码"`
+	Role     int    `gorm:"int;not null" json:"role" validate:"required,eq=2" label:"权限"`
+	/*Sex           string `gorm:"type:varchar(50);not null" json:"sex"  label:"性别"`
 	Age           int    `gorm:"type:int;not null" json:"age"  label:"年龄"`
 	Phone         string `gorm:"type:varchar(50);not null" json:"phone" validate:"required,len=11" label:"手机号"`
 	Email         string `gorm:"type:varchar(50);not null" json:"email" validate:"required,email" label:"邮箱"`
@@ -36,7 +36,7 @@ type Admin struct {
 	Eduction      string `gorm:"type:varchar(50)" json:"eduction"  label:"学历"`
 	Undergraduate string `gorm:"type:varchar(50)" json:"undergraduate"  label:"本科毕业院校"`
 	Graduate      string `gorm:"type:varchar(50)" json:"graduate"  label:"研究生毕业院校"`
-	Doctorate     string `gorm:"type:varchar(50)" json:"doctorate"  label:"博士毕业院校"`
+	Doctorate     string `gorm:"type:varchar(50)" json:"doctorate"  label:"博士毕业院校"`*/
 }
 
 type Book struct {

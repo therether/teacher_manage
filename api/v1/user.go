@@ -47,6 +47,16 @@ func DeleteUser(c *gin.Context) {
 	c.ShouldBind(&u)
 
 	number := c.Query("number")
+
+	code1, _ := model.CheckUser(number)
+	if code1 == 200 {
+		c.JSON(http.StatusOK, gin.H{
+			"code1": 500,
+			"text1": "用户已不存在",
+		})
+		return
+	}
+
 	code, text := model.DeleteUser(number)
 	if code == 500 {
 		c.JSON(http.StatusOK, gin.H{
@@ -61,7 +71,7 @@ func DeleteUser(c *gin.Context) {
 	})
 }
 
-// UpdateUser 用户修改用户信息
+// UpdateUser 教师修改自己信息
 func UpdateUser(c *gin.Context) {
 	var u model.User
 	c.ShouldBind(&u)
@@ -78,9 +88,9 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("u:", &u)*/
+	fmt.Println("u:", &u)
 
-	/*name := c.PostForm("name")
+	name := c.PostForm("name")
 	fmt.Println("name:", name)
 	role, _ := strconv.Atoi(c.PostForm("role"))
 	fmt.Println("role:", role)
@@ -139,8 +149,8 @@ func Update(c *gin.Context) {
 	}
 
 	//id, _ := strconv.Atoi(c.Param("id"))
-	token := c.GetHeader("token")
-	code, text := model.Update(token, &u)
+	//token := c.GetHeader("token")
+	code, text := model.Update(u.Number, &u)
 	if code == 500 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": code,
@@ -156,7 +166,7 @@ func Update(c *gin.Context) {
 	})
 }
 
-// SelectUserById 用户根据token查看用户信息
+// SelectUserById 教师根据token查看自己信息
 func SelectUserById(c *gin.Context) {
 	var u model.User
 	c.ShouldBind(&u)
@@ -186,7 +196,7 @@ func SelectUserById(c *gin.Context) {
 	})
 }
 
-// SelectUserOne 管理员根据token查看用户信息
+// SelectUserOne 管理员根据number查看用户信息
 func SelectUserOne(c *gin.Context) {
 	//var u model.User
 	//c.ShouldBind(&u)
@@ -213,7 +223,7 @@ func SelectUserOne(c *gin.Context) {
 	number := c.Query("number")
 	//fmt.Println("number:", number)
 
-	data, code, text := model.SelectUserOne(token, number)
+	code, text, data := model.SelectUserOne(token, number)
 	if code == 500 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": code,
@@ -240,12 +250,17 @@ func SelectAllUser(c *gin.Context) {
 		pageSize = -1
 	}
 
-	data, code, text := model.SelectAllUser(pageNum, pageSize)
+	//data, code, text := model.SelectAllUser(pageNum, pageSize)
+	code, text, data := model.SelectAllUser(pageNum, pageSize)
 	if code == 500 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": code,
 			"text": text,
 			"data": data,
+			/*"user":    user,
+			"book":    book,
+			"course":  course,
+			"project": project,*/
 		})
 		return
 	}
@@ -253,5 +268,9 @@ func SelectAllUser(c *gin.Context) {
 		"code": code,
 		"text": text,
 		"data": data,
+		/*"user":    user,
+		"book":    book,
+		"course":  course,
+		"project": project,*/
 	})
 }

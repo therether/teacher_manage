@@ -38,7 +38,6 @@ func CheckLogin(number string, password string) (int, string, map[string]any) {
 		}
 		return a.Role, 200, "登录成功"
 	}*/
-
 	//var token string
 	//var name string
 	//var role int
@@ -102,8 +101,8 @@ func CheckLogin(number string, password string) (int, string, map[string]any) {
 
 	//查询用户是否在admin表中
 	var a Admin
-	sqlStr2 := `select id,name,number,role,sex,age,phone,email,address,employtime,eduction,undergraduate,graduate,doctorate from admin where number=? and password=?`
-	err2 := db.QueryRow(sqlStr2, number, password).Scan(&a.ID, &a.Name, &a.Number, &a.Role, &a.Sex, &a.Age, &a.Phone, &a.Email, &a.Address, &a.Employtime, &a.Eduction, &a.Undergraduate, &a.Graduate, &a.Doctorate)
+	sqlStr2 := `select id,name,number,role from admin where number=? and password=?`
+	err2 := db.QueryRow(sqlStr2, number, password).Scan(&a.ID, &a.Name, &a.Number, &a.Role)
 	if err2 == nil {
 		return 200, "登录成功", map[string]any{
 			"data":    a,
@@ -154,7 +153,7 @@ func DeleteUser(number string) (int, string) {
 //	return 200, "更新成功"
 //}
 
-// UpdateUser 教师修改教师信息
+// UpdateUser 教师修改自己信息
 func UpdateUser(token string, u *User) (int, string) {
 
 	_, _, _, number := middleware.ParseToken(token)
@@ -169,10 +168,10 @@ func UpdateUser(token string, u *User) (int, string) {
 	return 200, "更新成功"
 }
 
-// Update 管理员修改用户信息
-func Update(token string, u *User) (int, string) {
+// Update 管理员修改教师信息
+func Update(number string, u *User) (int, string) {
 
-	_, _, _, number := middleware.ParseToken(token)
+	//_, _, _, number := middleware.ParseToken(token)
 
 	sqlStr := `update user set name=?,number=?,role=?,sex=?,age=?,phone=?,email=?,address=?,employtime=?,eduction=?,undergraduate=?,graduate=?,doctorate=? where number=?`
 
@@ -184,7 +183,7 @@ func Update(token string, u *User) (int, string) {
 	return 200, "更新成功"
 }
 
-// SelectUserById 根据token查看用户信息
+// SelectUserById 教师根据token查看自己信息
 func SelectUserById(token string) (int, string, map[string]any) {
 	/*sqlStr := `select id,name,number,password,role,sex,age,phone,email,address,employtime,eduction,undergraduate,graduate,doctorate from user where id=?`
 	var u User
@@ -286,45 +285,138 @@ func SelectUserById(token string) (int, string, map[string]any) {
 //	Number string `json:"number"`
 //}
 
-// SelectUserOne 管理员根据token查看用户信息
-func SelectUserOne(token string, number string) (User, int, string) {
+// SelectUserOne 管理员根据number查看教师信息
+func SelectUserOne(token string, number string) (int, string, map[string]any) {
 	/*sqlStr := `select id,name,number,password,role,sex,age,phone,email,address,employtime,eduction,undergraduate,graduate,doctorate from user where id=?`
 	var u User
 	err := db.QueryRow(sqlStr, id).Scan(&u.ID, &u.Name, &u.Number, &u.Password, &u.Role, &u.Sex, &u.Age, &u.Phone, &u.Email, &u.Address, &u.Employtime, &u.Eduction, &u.Undergraduate, &u.Graduate, &u.Doctorate)*/
 	var u User
+	var b Book
+	var c Course
+	var p Project
 	_, _, _, number1 := middleware.ParseToken(token)
 	fmt.Println("number1:", number1)
 	//fmt.Println("Number:", num.Number)
 
-	sqlStr := `select * from user where number=?`
+	//sqlStr := `select * from user where number=?`
+	sqlStr := `select u.*,
+       b.bookname,b.bookpublishdate,b.bookcontent,b.bookisbn,
+       c.course,
+       p.projectname,p.projectcontent
+	   from user u 
+	       join book b on u.number=b.number  
+		   join course c on u.number=c.number 
+		   join project p on u.number=p.number 
+	   where u.number=?`
 
-	err := db.QueryRow(sqlStr, number).Scan(&u.ID, &u.Name, &u.Number, &u.Password, &u.Role, &u.Imgurl, &u.Sex, &u.Age, &u.Phone, &u.Email, &u.Address, &u.Employtime, &u.Eduction, &u.Undergraduate, &u.Graduate, &u.Doctorate)
+	err := db.QueryRow(sqlStr, number).Scan(&u.ID, &u.Name, &u.Number, &u.Password, &u.Role, &u.Imgurl, &u.Sex, &u.Age, &u.Phone, &u.Email, &u.Address, &u.Employtime, &u.Eduction, &u.Undergraduate, &u.Graduate, &u.Doctorate,
+		&b.BookName, &b.Bookpublishdate, &b.BookContent, &b.BookIsbn,
+		&c.Course,
+		&p.ProjectName, &p.ProjectContent)
 	if err != nil {
 		fmt.Println("err:", err)
-		return u, 500, "该用户不存在"
+		return 500, "该用户不存在", nil
 	}
-	return u, 200, "查看用户信息成功"
+	s := make(map[string]any)
+	s["user"] = u
+	s["book"] = map[string]interface{}{
+		"bookname":        b.BookName,
+		"bookpublishdate": b.Bookpublishdate,
+		"bookcontent":     b.BookContent,
+		"bookisbn":        b.BookIsbn,
+	}
+	s["course"] = map[string]interface{}{
+		"course": c.Course,
+	}
+	s["project"] = map[string]interface{}{
+		"projectname":    p.ProjectName,
+		"projectcontent": p.ProjectContent,
+	}
+	return 200, "查看用户信息成功", s
 }
 
-// SelectAllUser 查看所有用户信息
-func SelectAllUser(pageNum int, pageSize int) ([]User, int, string) {
-	var user []User
+// SelectAllUser 管理员查看所有教师信息
+func SelectAllUser(pageNum int, pageSize int) (int, string, any) {
+
 	offset := (pageNum - 1) * pageSize
-	sqlStr := `select * from user limit ? offset ?`
+	//sqlStr := `select * from user limit ? offset ?`
+	sqlStr := `select u.*,
+ 	      b.id,b.name,b.number,b.bookname,b.bookpublishdate,b.bookcontent,b.bookisbn,
+	      c.id,c.name,c.number,c.course,
+	      p.id,p.name,p.number,p.projectname,p.projectcontent
+		   from user u
+		       join book b on u.number=b.number
+			   join course c on u.number=c.number
+			   join project p on u.number=p.number
+			   limit ? offset ?`
+
 	rows, err := db.Query(sqlStr, pageSize, offset)
 	if err != nil {
 		fmt.Printf("err:%s\n", err)
 	}
 	defer rows.Close()
 
+	var alldatas []struct {
+		User    User    `json:"user"`
+		Book    Book    `json:"book"`
+		Course  Course  `json:"course"`
+		Project Project `json:"project"`
+	}
+
 	for rows.Next() {
-		var u User
-		err := rows.Scan(&u.ID, &u.Name, &u.Number, &u.Password, &u.Role, &u.Imgurl, &u.Sex, &u.Age, &u.Phone, &u.Email, &u.Address, &u.Employtime, &u.Eduction, &u.Undergraduate, &u.Graduate, &u.Doctorate)
-		user = append(user, u)
+		//var u User
+		//var b Book
+		//var c Course
+		//var p Project
+		/*err := rows.Scan(
+			&u.ID, &u.Name, &u.Number, &u.Password, &u.Role, &u.Imgurl, &u.Sex, &u.Age, &u.Phone, &u.Email, &u.Address, &u.Employtime, &u.Eduction, &u.Undergraduate, &u.Graduate, &u.Doctorate,
+			&b.BookName, &b.Bookpublishdate, &b.BookContent, &b.BookIsbn,
+			&c.Course,
+			&p.ProjectName, &p.ProjectContent,
+		)*/
+		/*alldata = append(alldata, struct {
+
+			Project Project
+		}{User: u, Book: b, Course: c, Project: p})*/
+		var alldata struct {
+			User    User    `json:"user"`
+			Book    Book    `json:"book"`
+			Course  Course  `json:"course"`
+			Project Project `json:"project"`
+		}
+		err := rows.Scan(
+			&alldata.User.ID, &alldata.User.Name, &alldata.User.Number, &alldata.User.Password, &alldata.User.Role, &alldata.User.Imgurl, &alldata.User.Sex, &alldata.User.Age, &alldata.User.Phone, &alldata.User.Email, &alldata.User.Address, &alldata.User.Employtime, &alldata.User.Eduction, &alldata.User.Undergraduate, &alldata.User.Graduate, &alldata.User.Doctorate,
+			&alldata.Book.ID, &alldata.Book.Name, &alldata.Book.Number, &alldata.Book.BookName, &alldata.Book.Bookpublishdate, &alldata.Book.BookContent, &alldata.Book.BookIsbn,
+			&alldata.Course.ID, &alldata.Course.Name, &alldata.Course.Number, &alldata.Course.Course,
+			&alldata.Project.ID, &alldata.Project.Name, &alldata.Project.Number, &alldata.Project.ProjectName, &alldata.Project.ProjectContent,
+		)
+
 		if err != nil {
 			fmt.Printf("scan failed,err:%v\n", err)
-			return user, 500, "查看用户信息失败"
+			return 500, "查看用户信息失败", nil
 		}
+		alldatas = append(alldatas, alldata)
+
 	}
-	return user, 200, "查看用户信息成功"
+
+	//s := make(map[string]any)
+	/*s["user"] = user
+	s["book"] = book
+	s["course"] = course
+	s["project"] = project*/
+	/*s["user"] = alldata.User
+	s["book"] = map[string]interface{}{
+		"bookname":        alldata.Book.BookName,
+		"bookpublishdate": alldata.Book.Bookpublishdate,
+		"bookcontent":     alldata.Book.BookContent,
+		"bookisbn":        alldata.Book.BookIsbn,
+	}
+	s["course"] = map[string]interface{}{
+		"course": alldata.Course.Course,
+	}
+	s["project"] = map[string]interface{}{
+		"projectname":    alldata.Project.ProjectName,
+		"projectcontent": alldata.Project.ProjectContent,
+	}*/
+	return 200, "查看用户信息成功", alldatas
 }

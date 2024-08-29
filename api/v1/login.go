@@ -13,12 +13,10 @@ func Login(c *gin.Context) {
 
 	//number := c.PostForm("number")
 	//password := c.PostForm("password")
-
 	//var number string
 	//var password string
 	//c.ShouldBindJSON(&number)
 	//c.ShouldBindJSON(&password)
-
 	//
 	//body, err := ioutil.ReadAll(c.Request.Body)
 	//if err != nil {

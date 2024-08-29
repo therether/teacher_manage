@@ -9,9 +9,6 @@ import (
 
 // UpdatePsw 修改密码
 func UpdatePsw(c *gin.Context) {
-	//var u model.User
-	//c.ShouldBind(&u)
-
 	var p model.Psw
 	err := c.ShouldBind(&p)
 	if err != nil {
@@ -36,10 +33,6 @@ func UpdatePsw(c *gin.Context) {
 	_, code, text := model.CheckPsw(token, &p)
 	if code == 500 {
 		c.JSON(http.StatusOK, gin.H{
-			//"password": psw,
-			//"oldPsw":   oldPsw,
-			//"newPsw1":  newPsw1,
-			//"newPsw2":  newPsw2,
 			"data": p,
 			"code": code,
 			"text": text,
@@ -49,10 +42,6 @@ func UpdatePsw(c *gin.Context) {
 	if code == 200 {
 		code1, text1 := model.UpdatePsw(token, p.NewPsw2)
 		c.JSON(http.StatusOK, gin.H{
-			//"password": psw,
-			//"oldPsw":   oldPsw,
-			//"newPsw1":  newPsw1,
-			//"newPsw2":  newPsw2,
 			"data": p,
 			"code": code1,
 			"text": text1,

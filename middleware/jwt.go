@@ -27,7 +27,7 @@ type MyClaims struct {
 }
 
 func SetToken(number string, password string) (string, int, string) {
-	expireTime := time.Now().Add(time.Hour * 24 * 7) //七天
+	expireTime := time.Now().Add(time.Hour * 24 * 356) //356天
 	//expireTime := time.Now().Add(time.Second * 3)
 	SetClaims := MyClaims{
 		number,
@@ -92,7 +92,7 @@ func JwtToken() gin.HandlerFunc {
 		}
 
 		key, _, tCode, _ := ParseToken(checkToken[0])
-		if time.Now().Unix() > key.ExpiresAt {
+		if time.Now().Unix() >= key.ExpiresAt {
 			code = 1006
 			c.JSON(http.StatusOK, gin.H{
 				"code":    code,

@@ -3,14 +3,19 @@ package model
 import (
 	"fmt"
 	gomail "gopkg.in/mail.v2"
-	"teacher2/middleware"
 )
 
+type ToEmail struct {
+	//FromEmail string `json:"fromemail"`
+	ToEmail string `json:"toemail"` //收件人邮箱
+}
+
 // Email 使用qq邮箱发送验证码
-func Email(toEmail string, vcode string) error {
+func Email(e *ToEmail, vcode string) error {
 	mailer := gomail.NewMessage()
+	//mailer.SetHeader("From", e.FromEmail)                           //发件人邮箱
 	mailer.SetHeader("From", "2425626506@qq.com")                   //发件人邮箱
-	mailer.SetHeader("To", toEmail)                                 //收件人邮箱
+	mailer.SetHeader("To", e.ToEmail)                               //收件人邮箱
 	mailer.SetHeader("Subject", "验证码")                              //主题：验证码
 	mailer.SetBody("text/plain", fmt.Sprintf("您的验证码是:%s\n", vcode)) //内容
 
@@ -22,7 +27,8 @@ func Email(toEmail string, vcode string) error {
 	}
 	return nil
 }
-func ResetPsw(token, newPsw1, newPsw2 string) (int, string) {
+
+/*func ResetPsw(token, newPsw1, newPsw2 string) (int, string) {
 	_, _, _, number := middleware.ParseToken(token)
 	if newPsw1 != newPsw2 {
 		return 500, "两次密码不一致"
@@ -36,3 +42,4 @@ func ResetPsw(token, newPsw1, newPsw2 string) (int, string) {
 	}
 	return 200, "重置密码成功"
 }
+*/
